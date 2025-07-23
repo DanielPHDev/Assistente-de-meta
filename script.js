@@ -1,0 +1,75 @@
+const apiKeyInput = document.getElementById('apiKey');
+const gameSelect = document.getElementById('gameSelect');
+const questionInput = document.getElementById('questionInput');
+const askButton = document.getElementById('askButton');
+const aiResponse = document.getElementById('aiResponse');
+const form = document.getElementById('form');
+
+const markdownToHTML = (text)  => {
+   const converter = new showdown.Converter();
+   return converter.makeHtml(text);
+}
+
+// chave de API: AIzaSyC25Ojh88JAWKc0iREXT60QkSNp7B43jn4
+
+const perguntarIA = async (apiKey, game, question) => {
+   const model = "gemini-2.0-flash";
+   const geminiURL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+   const pergunta = `tenho esse jogo: ${game} e queria saber ${question}`;
+
+   const contents = [{
+      parts: [{
+         text: pergunta
+      }]
+   }];
+
+   // chamada API
+   const response = await fetch(geminiURL, {
+      method: 'POST',
+      headers: {
+         'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents
+      })
+   });
+
+   const data = await response.json();
+   return data.candidates[0].content.parts[0].text;
+}
+
+const enviarFormulario = async (event) => {
+ event.preventDefault();
+ const apiKey = apiKeyInput.value;
+ const game = gameSelect.value;
+ const question = questionInput.value;
+
+ if(apiKey == '' || game == '' || question == '') {
+    alert('Por favor, preencha todos os campos.');
+    return;
+ }
+
+  askButton.disabled = true;
+  askButton.textContent = 'Perguntando...';
+  askButton.classList.add('loading');
+
+  try {
+   // perguntar para IA
+   const text = await perguntarIA(apiKey, game, question);
+   aiResponse.querySelector('.response-content').innerHTML = markdownToHTML(text);
+
+ } catch (error) {
+    console.log('Erro:', error);
+
+ } finally {
+
+    askButton.disabled = false;
+    askButton.textContent = 'Perguntar';
+    askButton.classList.remove('loading');
+
+ }
+}
+
+// Adicione fora da função!
+form.addEventListener('submit', enviarFormulario);
+
