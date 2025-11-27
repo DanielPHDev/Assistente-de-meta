@@ -10,7 +10,7 @@ const markdownToHTML = (text)  => {
    return converter.makeHtml(text);
 }
 
-// chave de API: AIzaSyC25Ojh88JAWKc0iREXT60QkSNp7B43jn4
+
 
 const perguntarIA = async (apiKey, game, question) => {
    const model = "gemini-2.0-flash";
